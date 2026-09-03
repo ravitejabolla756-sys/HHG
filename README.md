@@ -46,3 +46,7 @@ Tests use `DRY_RUN=true` only through test fixtures; dry-run results are rejecte
 Open the Amoy transaction URL printed by the CLI. Confirm the `VerificationRegistered` event, hash, source URL, timestamp, and submitting address. Recreate the exact canonical JSON printed by the CLI using sorted keys and compact separators, SHA-256 it, and compare it with the event hash. The CLI also calls the contract's public `getVerification` function after mining.
 
 See [docs/architecture.md](docs/architecture.md), [docs/limitations.md](docs/limitations.md), and [docs/demo-script.md](docs/demo-script.md).
+
+## Live Polygon Amoy evidence
+
+The reference deployment and successful end-to-end registration are documented in [docs/live-validation.md](docs/live-validation.md). These are public testnet identifiers; no secrets or biometric data are included.

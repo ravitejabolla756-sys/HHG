@@ -1,4 +1,5 @@
-import { ethers } from "hardhat";
+import hre from "hardhat";
+const { ethers } = hre;
 const network = await ethers.provider.getNetwork();
 if (network.chainId !== 80002n) {
   throw new Error(`Refusing deployment: expected Polygon Amoy chain ID 80002, received ${network.chainId}`);
