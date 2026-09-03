@@ -25,4 +25,7 @@ class FaceDetector:
         image = cv2.imread(str(image_path))
         if image is None:
             raise ValueError(f"Unable to read image: {image_path}")
+        return self.detect_array(image)
+
+    def detect_array(self, image: Any) -> list[DetectedFace]:
         return [DetectedFace(tuple(map(float, face.bbox)), face) for face in self._analysis.get(image)]

@@ -4,7 +4,7 @@ CLI-first, consent-only face encoding, genuine reverse-image search, and tamper-
 
 ## What it does
 
-The pipeline detects every face locally with InsightFace `buffalo_l`, creates an ephemeral local embedding, sends the input image to a configured reverse-image-search provider, selects a provider-returned public social URL, builds a deterministic verification payload, hashes it with SHA-256, and registers only that hash plus minimal public metadata in `VerificationRegistry`. The model is downloaded on first use into the ignored `.models/insightface` directory.
+The pipeline requires exactly one input face, creates an ephemeral local InsightFace `buffalo_l` embedding, and sends the input image to the configured reverse-image-search provider. Social URLs are parsed only from first-class Lens visual/exact matches. Each candidate must then pass a local face-embedding comparison against its provider-returned Lens thumbnail before selection. Unverified URLs are rejected, and an empty verified set stops the process before blockchain registration. A verified result is recorded as deterministic canonical JSON whose SHA-256 and minimal public metadata are registered in `VerificationRegistry`. The model is downloaded on first use into the ignored `.models/insightface` directory.
 
 No face image, embedding, private profile data, or biometric data is written to the chain. Use only an image of the repository owner, a consenting person, or a clearly public image.
 
@@ -37,7 +37,7 @@ Copy the printed address and deployment block into `CONTRACT_ADDRESS` and `CONTR
 python -m app.main --image path\to\consented-image.jpg
 ```
 
-The command prints all six stages, input hash, provider status and candidates, selected URL/platform, canonical payload and hash, transaction hash, explorer URL, and an independent read-back comparison. It fails with a non-zero exit code when no face or no real provider result is available.
+The command prints all six stages, input hash, provider status, Lens visual/exact counts, rejected candidates, the verified URL/platform and verification evidence, canonical payload and hash, transaction hash, explorer URL, and an independent read-back comparison. Candidate verification uses cosine similarity between the input face embedding and faces detected in trusted provider-returned Lens thumbnails, with a conservative `0.45` acceptance threshold. Embeddings and thumbnails remain in process memory and are discarded. The command exits non-zero before blockchain registration when the image does not contain exactly one face or no social candidate can be verified.
 
 Tests use `DRY_RUN=true` only through test fixtures; dry-run results are rejected unless `ALLOW_DRY_RUN=true` is explicitly set by the test process. Run the JavaScript payload test with `npm run test:blockchain`.
 
@@ -49,4 +49,4 @@ See [docs/architecture.md](docs/architecture.md), [docs/limitations.md](docs/lim
 
 ## Live Polygon Amoy evidence
 
-The reference deployment and successful end-to-end registration are documented in [docs/live-validation.md](docs/live-validation.md). These are public testnet identifiers; no secrets or biometric data are included.
+The reference contract deployment and historical pre-verification registration are documented in [docs/live-validation.md](docs/live-validation.md). Historical records created before candidate face verification was added must not be treated as verified matching evidence. A submission-quality live run requires Stage 5 to print a verified candidate and Stage 6 to confirm its resulting hash on-chain. These are public testnet identifiers; no secrets or biometric data are included.

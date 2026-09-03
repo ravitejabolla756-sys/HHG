@@ -10,7 +10,9 @@ Validated on 2026-09-03 against Polygon Amoy, chain ID `80002`.
 - Deployment block: `46634201`
 - Contract explorer: <https://amoy.polygonscan.com/address/0xb44b993fFfA9EDEaD404Aa0B44fB639f3504B703>
 
-## End-to-end verification record
+## Historical pre-verification record
+
+> **Not valid as matching evidence.** This record was created before Stage 5 compared the input face with provider-returned candidate thumbnails. It proves only that the listed payload was registered and read back correctly; it does not prove that the selected URL matched the input image. The immutable testnet record is retained here for transparent audit history and must not be used as final Task #3 evidence.
 
 - Input image SHA-256: `dcb81b1c2315e6ac7fd0be8a671834347fc24cea272e5de1bcf6048ec5b8e718`
 - Selected public result: <https://www.youtube.com/watch?v=uXTIgM-tS_s>
@@ -22,4 +24,8 @@ Validated on 2026-09-03 against Polygon Amoy, chain ID `80002`.
 - Contract read-back: passed
 - Local/event hash comparison: exact match
 
-The transaction receipt status was `1`. A separate read-only process retrieved the record from `getVerification(bytes32)` and confirmed the source URL, platform, non-zero timestamp, submitting wallet, and emitted hash. Raw images and face embeddings were not stored on-chain.
+The transaction receipt status was `1`. A separate read-only process retrieved the record from `getVerification(bytes32)` and confirmed the source URL, platform, non-zero timestamp, submitting wallet, and emitted hash. That blockchain integrity check passed, but the old URL-selection logic did not verify visual identity. Raw images and face embeddings were not stored on-chain.
+
+## Current fail-closed validation
+
+On 2026-09-03, a fresh run with `examples/1100.png` returned 59 visual Lens matches, 0 exact matches, and 10 social-media candidates. Local InsightFace comparison rejected all 10 candidate thumbnails; the best cosine similarity was `0.1612`, below the required `0.45`. The command exited with code `1` before blockchain registration. No URL, payload, hash, or transaction from that run is represented as a successful match.

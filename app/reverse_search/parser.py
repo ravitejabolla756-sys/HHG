@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from urllib.parse import urlparse
 
+
 SOCIAL_DOMAINS = {
     "instagram.com": "instagram",
     "tiktok.com": "tiktok",
@@ -11,19 +12,17 @@ SOCIAL_DOMAINS = {
     "threads.net": "threads",
     "linkedin.com": "linkedin",
 }
+
+
 @dataclass(frozen=True)
 class Candidate:
     url: str
     title: str
     platform: str
-
-def _walk(value):
-    if isinstance(value, dict):
-        for key, item in value.items():
-            if key.lower() in {"url", "link", "source_url"} and isinstance(item, str): yield item, value.get("title", "")
-            yield from _walk(item)
-    elif isinstance(value, list):
-        for item in value: yield from _walk(item)
+    match_type: str = "visual"
+    position: int | None = None
+    source: str = ""
+    thumbnail_url: str | None = None
 
 def _platform_for_host(host: str) -> str | None:
     for domain, platform in SOCIAL_DOMAINS.items():
@@ -31,13 +30,43 @@ def _platform_for_host(host: str) -> str | None:
             return platform
     return None
 
+
+def _thumbnail_url(item: dict) -> str | None:
+    for key in ("thumbnail", "image", "image_url"):
+        value = item.get(key)
+        if isinstance(value, str) and value.startswith(("https://", "http://")):
+            return value
+    return None
+
+
 def parse_candidates(payload: dict) -> list[Candidate]:
-    seen, result = set(), []
-    for url, title in _walk(payload):
-        parsed = urlparse(url)
-        host = parsed.netloc.lower().split(":")[0]
-        platform = _platform_for_host(host)
-        if parsed.scheme not in {"http", "https"} or platform is None or url in seen: continue
-        seen.add(url)
-        result.append(Candidate(url, str(title), platform))
-    return result
+    """Parse only first-class Lens matches, never arbitrary nested URLs."""
+    candidates_by_url: dict[str, Candidate] = {}
+    for section, match_type in (("exact_matches", "exact"), ("visual_matches", "visual")):
+        matches = payload.get(section, [])
+        if not isinstance(matches, list):
+            continue
+        for item in matches:
+            if not isinstance(item, dict):
+                continue
+            url = item.get("link")
+            if not isinstance(url, str):
+                continue
+            parsed = urlparse(url)
+            host = parsed.hostname.lower() if parsed.hostname else ""
+            platform = _platform_for_host(host)
+            if parsed.scheme not in {"http", "https"} or platform is None:
+                continue
+            candidate = Candidate(
+                url=url,
+                title=str(item.get("title", "")),
+                platform=platform,
+                match_type=match_type,
+                position=item.get("position") if isinstance(item.get("position"), int) else None,
+                source=str(item.get("source", "")),
+                thumbnail_url=_thumbnail_url(item),
+            )
+            existing = candidates_by_url.get(url)
+            if existing is None or (existing.match_type != "exact" and match_type == "exact"):
+                candidates_by_url[url] = candidate
+    return list(candidates_by_url.values())
