@@ -29,7 +29,7 @@ npx hardhat compile
 npx hardhat run scripts/deploy.js --network amoy
 ```
 
-Copy the printed address into `CONTRACT_ADDRESS`. Never commit `.env` or private keys.
+Copy the printed address and deployment block into `CONTRACT_ADDRESS` and `CONTRACT_DEPLOYMENT_BLOCK`. The block is used for provider-compatible event lookup when verifying an existing record. Never commit `.env` or private keys.
 
 ## Run
 
