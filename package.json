@@ -1,0 +1,1 @@
+{"name":"hhgoa-task3","private":true,"type":"module","scripts":{"compile":"hardhat compile","test:blockchain":"node --test tests/test_blockchain_payload.mjs"},"dependencies":{"dotenv":"^16.4.5","ethers":"^6.13.2"},"devDependencies":{"@nomicfoundation/hardhat-ethers":"^3.0.0","hardhat":"^2.22.15"}}
