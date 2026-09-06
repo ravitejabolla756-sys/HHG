@@ -1,6 +1,6 @@
 # Live Polygon Amoy validation
 
-Validated on 2026-09-03 against Polygon Amoy, chain ID `80002`.
+Validated against Polygon Amoy, chain ID `80002`. Deployment and historical evidence were first checked on 2026-09-03; the corrected post-fix pipeline was validated on 2026-09-06.
 
 ## Deployment
 
@@ -26,6 +26,31 @@ Validated on 2026-09-03 against Polygon Amoy, chain ID `80002`.
 
 The transaction receipt status was `1`. A separate read-only process retrieved the record from `getVerification(bytes32)` and confirmed the source URL, platform, non-zero timestamp, submitting wallet, and emitted hash. That blockchain integrity check passed, but the old URL-selection logic did not verify visual identity. Raw images and face embeddings were not stored on-chain.
 
-## Current fail-closed validation
+## Corrected post-fix verification record
 
-On 2026-09-03, a fresh run with `examples/1100.png` returned 59 visual Lens matches, 0 exact matches, and 10 social-media candidates. Local InsightFace comparison rejected all 10 candidate thumbnails; the best cosine similarity was `0.1612`, below the required `0.45`. The command exited with code `1` before blockchain registration. No URL, payload, hash, or transaction from that run is represented as a successful match.
+This record was created only after the provider-returned Lens thumbnail passed local InsightFace comparison against the input face.
+
+- Validation date: `2026-09-06`
+- Input image SHA-256: `dcb81b1c2315e6ac7fd0be8a671834347fc24cea272e5de1bcf6048ec5b8e718`
+- Lens visual matches: `59`
+- Lens exact matches: `0`
+- Parsed social candidates: `24`
+- Candidate verification method: local InsightFace cosine similarity against the provider-returned Lens thumbnail
+- Selected similarity: `0.8735`
+- Required threshold: `0.45`
+- Verified platform: `facebook`
+- Verified public result: <https://www.facebook.com/groups/1626959317631302/posts/4476311472696058/>
+- Canonical payload SHA-256: `9fd03140e8506ddd37e7743dd46976c61694eee0bbb125de8b50e3362212f7ce`
+- On-chain event hash: `9fd03140e8506ddd37e7743dd46976c61694eee0bbb125de8b50e3362212f7ce`
+- Registration transaction: `0x88818a992524bdf25a657d1e1519354ad22e402b45b924233048049db3517c71`
+- Registration block: `46851898`
+- Transaction explorer: <https://amoy.polygonscan.com/tx/0x88818a992524bdf25a657d1e1519354ad22e402b45b924233048049db3517c71>
+- Transaction confirmed: `true`
+- Local/on-chain hash match: `true`
+- Independent contract read-back: `true`
+
+The CLI printed `final verification result: PASS`. No source image, candidate thumbnail, or face embedding was persisted or registered.
+
+## Post-fix fail-closed validation
+
+On 2026-09-06, a fresh run with the approved local negative image returned 59 visual Lens matches, 0 exact matches, and 9 social-media candidates. Local InsightFace comparison rejected all 9 candidate thumbnails; the best cosine similarity was `0.1695`, below the required `0.45`. The command exited with code `1`, and Stage 6 never appeared, demonstrating that blockchain registration was not invoked. No URL, payload, hash, or transaction from that run is represented as a successful match.
